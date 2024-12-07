@@ -1,2 +1,2 @@
-flask
-python-telegram-bot==20.3  # Ensure the version matches your implementation
+Flask==2.1.2
+python-telegram-bot==20.0
