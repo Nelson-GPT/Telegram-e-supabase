@@ -1,6 +1,6 @@
 import os
 import logging
-from telegram.ext import Updater, CommandHandler
+from telegram.ext import Application, CommandHandler
 from commands.calculate import calculate_dosage
 from commands.search import search_topic
 from commands.help import help_command
@@ -13,15 +13,15 @@ logging.basicConfig(
 )
 logger = logging.getLogger(__name__)
 
-def main():
+async def main():
     """Start the bot using a webhook."""
-    # Initialize the Updater with the bot token
-    updater = Updater(TELEGRAM_BOT_TOKEN)
+    # Initialize the Application with the bot token
+    application = Application.builder().token(TELEGRAM_BOT_TOKEN).build()
 
     # Command Handlers
-    updater.dispatcher.add_handler(CommandHandler("help", help_command))
-    updater.dispatcher.add_handler(CommandHandler("calculate", calculate_dosage))
-    updater.dispatcher.add_handler(CommandHandler("search", search_topic))
+    application.add_handler(CommandHandler("help", help_command))
+    application.add_handler(CommandHandler("calculate", calculate_dosage))
+    application.add_handler(CommandHandler("search", search_topic))
 
     # Webhook settings
     PORT = int(os.environ.get("PORT", 8443))  # Use Render's dynamic port
@@ -31,7 +31,7 @@ def main():
         logger.error("RENDER_EXTERNAL_URL is not set. Exiting...")
         return
 
-    updater.start_webhook(
+    await application.start_webhook(
         listen="0.0.0.0",
         port=PORT,
         url_path=TELEGRAM_BOT_TOKEN,
@@ -41,7 +41,8 @@ def main():
     logger.info(f"Webhook started at {RENDER_EXTERNAL_URL}/{TELEGRAM_BOT_TOKEN}")
 
     # Idle to keep the bot running
-    updater.idle()
+    await application.run_polling()
 
 if __name__ == "__main__":
-    main()
+    import asyncio
+    asyncio.run(main())
